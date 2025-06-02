@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yönetim</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="menuBar">
+        <a href="index.php">Bilet Al</a>
+        <a href="iptal.php">İptal</a>
+        <a href="admin.php" class="aktif">Yönetim</a>
+    </nav>
+
+    <h1>Yönetim Paneli</h1>
+    
+    <form method="POST" action="admin.php" class="biletFormu">
+        <h2>Film Ekle</h2>
+        <div class="formGrup">
+            <label>Film Adı</label>
+            <input type="text" name="film_adi" required>
+        </div>
+
+        <div class="formGrup">
+            <label>Film Süresi (dk)</label>
+            <input type="number" name="film_suresi" required>
+        </div>
+
+        <div class="formGrup">
+            <label>Fiyat (TL)</label>
+            <input type="number" name="film_fiyat" required>
+        </div>
+
+        <button type="submit" name="film_ekle" class="buton">Film Ekle</button>
+    </form>
+
+    <form method="POST" action="admin.php" class="biletFormu">
+        <h2>Seans Ekle</h2>
+        <div class="formGrup">
+            <label>Film</label>
+            <select name="film_id" required>
+                <option value="">Film Seçin</option>
+            </select>
+        </div>
+
+        <div class="formGrup">
+            <label>Saat</label>
+            <input type="time" name="seans_saati" required>
+        </div>
+
+        <button type="submit" name="seans_ekle" class="buton">Seans Ekle</button>
+    </form>
+</body>
+</html> 

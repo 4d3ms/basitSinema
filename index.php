@@ -1,169 +1,85 @@
 <?php
-require_once 'db_connect.php';
+// Veritabanına bağlan
+include 'db_connect.php';
 
-// Filmleri getir
-$filmler = mysqli_query($conn, "SELECT * FROM filmler");
-if (!$filmler) {
-    die("Film sorgusu hatası: " . mysqli_error($conn));
-}
+// Hata mesajı için değişken
+$mesaj = '';
 
-// Salonları getir
-$salonlar = mysqli_query($conn, "SELECT * FROM salonlar");
-
-// Bilet alma işlemi
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Bilet alma formu gönderildi mi?
+if (isset($_POST['bilet_al'])) {
     $isim = $_POST['isim'];
-    $film = $_POST['film'];
-    $salon = $_POST['salon'];
-    $koltuk = $_POST['koltuk'];
-    $kart = $_POST['kart'];
-    $tarih = $_POST['tarih'];
-    $cvv = $_POST['cvv'];
-
-    // Boş alan kontrolü
-    if (empty($isim) || empty($film) || empty($salon) || empty($koltuk) || empty($kart) || empty($tarih) || empty($cvv)) {
-        echo "<div style='color: red; background: white; padding: 10px; margin: 10px auto; width: 300px;'>Tüm alanları doldurun!</div>";
+    
+    // İsim boş mu diye bak
+    if ($isim == "") {
+        $mesaj = '<p class="hata">İsim yazın!</p>';
     } else {
-        // Kart kontrolü
-        if (strlen($kart) != 16) {
-            echo "<div style='color: red; background: white; padding: 10px; margin: 10px auto; width: 300px;'>Kart numarası 16 haneli olmalı!</div>";
-        } else if (strlen($cvv) != 3) {
-            echo "<div style='color: red; background: white; padding: 10px; margin: 10px auto; width: 300px;'>CVV 3 haneli olmalı!</div>";
+        // Bileti kaydet
+        $sql = "INSERT INTO biletler SET 
+                isim_soyisim = '$isim',
+                film_id = '$_POST[film]',
+                salon_id = 1,
+                koltuk_no = '$_POST[koltuk]',
+                fiyat = 50";
+        
+        // Kayıt başarılı mı?
+        if (mysqli_query($conn, $sql)) {
+            $mesaj = '<p class="basarili">Bilet alındı!</p>';
         } else {
-            // Film fiyatını al
-            $film_query = mysqli_query($conn, "SELECT film_fiyat FROM filmler WHERE id = '$film'");
-            $film_data = mysqli_fetch_assoc($film_query);
-            $fiyat = $film_data['film_fiyat'];
-
-            // Bileti veritabanına kaydet
-            $sql = "INSERT INTO biletler (isim_soyisim, film_id, salon_id, koltuk_no, fiyat) 
-                    VALUES ('$isim', '$film', '$salon', '$koltuk', '$fiyat')";
-            
-            if (mysqli_query($conn, $sql)) {
-                echo "<div style='color: green; background: white; padding: 10px; margin: 10px auto; width: 300px;'>Bilet başarıyla alındı!</div>";
-            } else {
-                echo "<div style='color: red; background: white; padding: 10px; margin: 10px auto; width: 300px;'>Hata: " . mysqli_error($conn) . "</div>";
-            }
+            $mesaj = '<p class="hata">Hata oluştu!</p>';
         }
     }
 }
 
-// Filmleri tekrar getir (form için)
+// Film listesini al
 $filmler = mysqli_query($conn, "SELECT * FROM filmler");
-?>
 
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>Sinema Bilet Sistemi</title>
-    <style>
-        body {
-            text-align: center;
-            font-family: Arial;
-            margin: 20px;
-            background-color: #1a237e;
-            color: white;
-        }
+// Film seçeneklerini hazırla
+$film_secenekleri = '<option value="">Film Seçin</option>';
+while($film = mysqli_fetch_array($filmler)) {
+    $secili = (isset($_POST['film']) && $_POST['film'] == $film['id']) ? 'selected' : '';
+    $film_secenekleri .= "<option value='" . $film['id'] . "' $secili>" . $film['film_adi'] . " - " . $film['film_fiyat'] . " TL</option>";
+}
 
-        .form-kutu {
-            border: 1px solid #ccc;
-            padding: 20px;
-            width: 300px;
-            margin: 0 auto;
-            text-align: left;
-            background-color: white;
-            color: black;
-            border-radius: 5px;
-        }
+// Koltuk seçeneklerini hazırla
+$koltuk_secenekleri = '<option value="">Koltuk Seçin</option>';
 
-        input, select {
-            width: 100%;
-            padding: 5px;
-            margin: 5px 0;
-            box-sizing: border-box;
-        }
+// Film seçildi mi?
+if (isset($_POST['film']) && $_POST['film'] != '') {
+    // Dolu koltukları al
+    $dolu_koltuklar = array();
+    $sorgu = "SELECT koltuk_no FROM biletler WHERE film_id = '$_POST[film]'";
+    $sonuc = mysqli_query($conn, $sorgu);
+    while ($row = mysqli_fetch_array($sonuc)) {
+        $dolu_koltuklar[] = $row['koltuk_no'];
+    }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            margin-top: 10px;
-        }
-
-        h2 {
-            margin: 10px 0;
-        }
-
-        .menu {
-            margin-bottom: 20px;
-        }
-
-        .menu a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            padding: 5px;
-        }
-
-        .menu a:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-    <div class="menu">
-        <a href="index.php">Anasayfa</a>
-        <a href="iptal.php">Bilet İptal</a>
-        <a href="admin.php">Yönetim Paneli</a>
-    </div>
-
-    <h1>Sinema Bilet Sistemi</h1>
+    // Tüm koltukları oluştur (1'den 10'a kadar)
+    $toplam_koltuk_sayisi = 10;
     
-    <div class="form-kutu">
-        <form method="POST">
-            <h2>Ad Soyad</h2>
-            <input type="text" name="isim" required>
+    // Her koltuk için
+    for ($koltuk_no = 1; $koltuk_no <= $toplam_koltuk_sayisi; $koltuk_no++) {
+        // Eğer koltuk dolu değilse, seçeneklere ekle
+        if (!in_array($koltuk_no, $dolu_koltuklar)) {
+            // Eğer bu koltuk daha önce seçilmişse, selected özelliği ekle
+            $koltuk_secili = (isset($_POST['koltuk']) && $_POST['koltuk'] == $koltuk_no) ? 'selected' : '';
+            
+            // Koltuk seçeneğini listeye ekle
+            $koltuk_secenekleri .= "<option value='$koltuk_no' $koltuk_secili>Koltuk $koltuk_no</option>";
+        }
+    }
+}
 
-            <h2>Film Seç</h2>
-            <select name="film" required>
-                <option value="">Film Seçin</option>
-                <?php while($film = mysqli_fetch_assoc($filmler)) { ?>
-                    <option value="<?php echo $film['id']; ?>">
-                        <?php echo $film['film_adi']; ?> - <?php echo isset($film['film_fiyat']) ? $film['film_fiyat'] : 'Fiyat Yok'; ?> TL
-                    </option>
-                <?php } ?>
-            </select>
+// HTML sayfasını oku
+$sayfa = file_get_contents('index.html');
 
-            <h2>Salon Seç</h2>
-            <select name="salon" required>
-                <option value="">Salon Seçin</option>
-                <?php while($salon = mysqli_fetch_assoc($salonlar)) { ?>
-                    <option value="<?php echo $salon['id']; ?>">
-                        Salon <?php echo $salon['salon_no']; ?>
-                    </option>
-                <?php } ?>
-            </select>
+// Seçenekleri sayfaya ekle
+$sayfa = str_replace('<option value="">Film Seçin</option>', $film_secenekleri, $sayfa);
+$sayfa = str_replace('<option value="">Koltuk Seçin</option>', $koltuk_secenekleri, $sayfa);
 
-            <h2>Koltuk Seç</h2>
-            <select name="koltuk" required>
-                <option value="">Koltuk Seçin</option>
-                <?php 
-                for($i = 1; $i <= 10; $i++) { 
-                    echo "<option value='A$i'>A$i</option>";
-                }
-                ?>
-            </select>
+// Mesaj varsa ekle
+if ($mesaj != '') {
+    $sayfa = str_replace('<h1>Bilet Al</h1>', '<h1>Bilet Al</h1>' . $mesaj, $sayfa);
+}
 
-            <h2>Kart Bilgileri</h2>
-            <input type="text" name="kart" placeholder="Kart Numarası" maxlength="16" required>
-            <input type="text" name="tarih" placeholder="Son Kullanma (AA/YY)" maxlength="5" required>
-            <input type="text" name="cvv" placeholder="CVV" maxlength="3" required>
-
-            <button type="submit">Bilet Al</button>
-        </form>
-    </div>
-</body>
-</html> 
+// Sayfayı göster
+echo $sayfa; 

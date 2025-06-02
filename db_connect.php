@@ -1,8 +1,10 @@
 <?php
+// MySQL bağlantısı
 $conn = mysqli_connect("localhost", "root", "", "sinema");
 
+// Hata varsa göster
 if (!$conn) {
-    echo "Veritabanı bağlantı hatası: " . mysqli_connect_error();
+    echo "Bağlantı hatası!";
     die();
 }
 ?> 

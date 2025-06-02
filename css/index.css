@@ -1,0 +1,93 @@
+body {
+    font-family: Arial;
+    margin: 20px;
+    background: #f5f5f5;
+}
+
+.menuBar {
+    background: #1a237e;
+    padding: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.menuBar a {
+    color: white;
+    text-decoration: none;
+    padding: 5px 15px;
+    margin: 0 10px;
+}
+
+.menuBar a.aktif {
+    background: rgba(255,255,255,0.2);
+}
+
+h1, h2 {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.biletFormu {
+    background: white;
+    padding: 20px;
+    width: 600px;
+    margin: 20px auto;
+}
+
+.formGrup {
+    margin-bottom: 15px;
+}
+
+.formGrup label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.formGrup input,
+.formGrup select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.kartBilgi {
+    background: #f9f9f9;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.buton {
+    width: 100%;
+    padding: 10px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+/* Seans Tablosu */
+.seansTablosu {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.seansTablosu th,
+.seansTablosu td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.seansTablosu th {
+    background: #f5f5f5;
+}
+
+/* İptal Detay */
+#iptal-detay {
+    background: white;
+    padding: 20px;
+    width: 600px;
+    margin: 20px auto;
+    text-align: center;
+} 

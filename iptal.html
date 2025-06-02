@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilet İptal</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <nav class="menuBar">
+        <a href="index.php">Bilet Al</a>
+        <a href="iptal.php" class="aktif">İptal</a>
+        <a href="admin.php">Yönetim</a>
+    </nav>
+
+    <h1>Bilet İptal</h1>
+    
+    <form method="POST" action="iptal.php" class="biletFormu">
+        <div class="formGrup">
+            <label>Ad Soyad</label>
+            <input type="text" name="isim_soyisim" required>
+        </div>
+
+        <div class="formGrup">
+            <label>Koltuk No</label>
+            <input type="text" name="koltuk_no" required>
+        </div>
+
+        <button type="submit" class="buton">İptal Et</button>
+    </form>
+
+    <div id="iptal-detay"></div>
+</body>
+</html> 
